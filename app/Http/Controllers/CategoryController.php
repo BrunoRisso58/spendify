@@ -4,31 +4,31 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Services\RecurrenceService;
+use App\Services\CategoryService;
 
-class RecurrenceController extends Controller
+class CategoryController extends Controller
 {
-    public function __construct(private RecurrenceService $service) {}
+    public function __construct(private CategoryService $service) {}
 
     public function index()
     {
         return response()->json(
-            $this->service->list(Auth::id())
+            $this->service->list()
+        );
+    }
+
+    public function getByAuthenticatedUser()
+    {
+        return response()->json(
+            $this->service->getByUser(Auth::id())
         );
     }
 
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'amount' => 'required|numeric',
+            'name' => 'required|string|max:255',
             'type' => 'required|in:entrada,saída',
-            'frequency' => 'required|in:daily,weekly,monthly,yearly',
-            'interval' => 'integer|min:1',
-            'start_date' => 'required|date',
-            'end_date' => 'nullable|date',
-            'description' => 'nullable|string',
-            'category_id' => 'nullable|exists:categories,id',
         ]);
 
         return response()->json(
@@ -49,12 +49,5 @@ class RecurrenceController extends Controller
         $this->service->delete(Auth::id(), $id);
 
         return response()->json(['message' => 'Deleted']);
-    }
-
-    public function toggle($id)
-    {
-        $recurrence = $this->service->toggle(Auth::id(), $id);
-
-        return response()->json($recurrence);
     }
 }

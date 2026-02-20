@@ -32,7 +32,8 @@ class CreateTransactionsFromRecurrence extends Command
             Recurrence::where(function ($q) {
                 $q->whereNull('end_date')
                     ->orWhere('end_date', '>=', now()->toDateString());
-            })->chunk(100, function ($recurrences) {
+            })->where('is_active', true)
+              ->chunk(100, function ($recurrences) {
                 foreach ($recurrences as $recurrence) {
                     $start = Carbon::parse($recurrence->start_date);
                     $now = now();

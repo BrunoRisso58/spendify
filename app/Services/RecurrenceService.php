@@ -31,4 +31,13 @@ class RecurrenceService
         $recurrence = Recurrence::where('user_id', $userId)->findOrFail($id);
         $recurrence->delete();
     }
+
+    public function toggle($userId, $id)
+    {
+        $recurrence = Recurrence::where('user_id', $userId)->findOrFail($id);
+        $recurrence->is_active = !$recurrence->is_active;
+        $recurrence->save();
+
+        return $recurrence;
+    }
 }

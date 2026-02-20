@@ -8,18 +8,32 @@ class TransactionService
 {
     public function list($userId, $filters = [])
     {
+        $from = $filters['from'] ?? null;
+        $to = $filters['to'] ?? null;
+        $type = $filters['type'] ?? null;
+        $categoryId = $filters['category_id'] ?? null;
+        $search = $filters['search'] ?? null;
+
         $query = Transaction::where('user_id', $userId);
 
-        if (!empty($filters['type'])) {
-            $query->where('type', $filters['type']);
+        if ($from) {
+            $query->where('date', '>=', $from);
         }
 
-        if (!empty($filters['from'])) {
-            $query->whereDate('date', '>=', $filters['from']);
+        if ($to) {
+            $query->where('date', '<=', $to);
         }
 
-        if (!empty($filters['to'])) {
-            $query->whereDate('date', '<=', $filters['to']);
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        if ($categoryId) {
+            $query->where('category_id', $categoryId);
+        }
+
+        if ($search) {
+            $query->where('title', 'like', "%$search%");
         }
 
         return $query->latest('date')->get();
