@@ -13,6 +13,7 @@ class TransactionService
         $type = $filters['type'] ?? null;
         $categoryId = $filters['category_id'] ?? null;
         $search = $filters['search'] ?? null;
+        $status = $filters['status'] ?? null;
 
         $query = Transaction::where('user_id', $userId);
 
@@ -34,6 +35,14 @@ class TransactionService
 
         if ($search) {
             $query->where('title', 'like', "%$search%");
+        }
+
+        if ($status === 'pending') {
+            $query->whereNull('paid_at');
+        } 
+        
+        if ($status === 'paid') {
+            $query->whereNotNull('paid_at');
         }
 
         return $query->latest('date')->get();
@@ -63,5 +72,27 @@ class TransactionService
     {
         $transaction = $this->find($userId, $id);
         $transaction->delete();
+    }
+
+    public function pay($userId, $id)
+    {
+        $transaction = $this->find($userId, $id);
+        
+        $transaction->update([
+            'paid_at' => now()
+        ]);
+
+        return $transaction;
+    }
+
+    public function unpay($userId, $id)
+    {
+        $transaction = $this->find($userId, $id);
+        
+        $transaction->update([
+            'paid_at' => null
+        ]);
+
+        return $transaction;
     }
 }

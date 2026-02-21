@@ -9,6 +9,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\AlertController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\InstallmentController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -25,6 +26,8 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/{id}', [TransactionController::class, 'show']);
         Route::put('/{id}', [TransactionController::class, 'update']);
         Route::delete('/{id}', [TransactionController::class, 'destroy']);
+        Route::patch('/{id}/pay', [TransactionController::class, 'pay']);
+        Route::patch('/{id}/unpay', [TransactionController::class, 'unpay']);
     });
 
     // Recurrences
@@ -67,4 +70,8 @@ Route::middleware('auth:api')->group(function () {
     });
 
     Route::get('/calendar', [CalendarController::class, 'index']);
+
+    Route::prefix('installments')->group(function () {
+        Route::post('/', [InstallmentController::class, 'store']);
+    });
 });

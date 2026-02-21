@@ -24,15 +24,27 @@ class ReportService
         $transactions = $query->get();
 
         $totalEntries = $transactions->where('type', 'entrada')->sum('amount');
-        $totalExits = $transactions->where('type', 'saída')->sum('amount');
-        $netBalance = $transactions->sum(function ($transaction) {
+
+        $totalExitsAll = $transactions->where('type', 'saída')->sum('amount');
+        $totalExitsPaid = $transactions->where('type', 'saída')->whereNotNull('paid_at')->sum('amount');
+
+        $netBalanceAll = $transactions->sum(function ($transaction) {
+            return $transaction->type === 'entrada' ? $transaction->amount : -$transaction->amount;
+        });
+        $netBalancePaid = $transactions->whereNotNull('paid_at')->sum(function ($transaction) {
             return $transaction->type === 'entrada' ? $transaction->amount : -$transaction->amount;
         });
 
         $summary = [
             'total_entries' => $totalEntries,
-            'total_exits' => $totalExits,
-            'net_balance' => $netBalance,
+            'total_exits' => [
+                "all" => $totalExitsAll, 
+                "paid" => $totalExitsPaid
+            ],
+            'net_balance' => [
+                "all" => $netBalanceAll, 
+                "paid" => $netBalancePaid
+            ],
         ];
 
         return $summary;
@@ -105,6 +117,7 @@ class ReportService
             ")
             ->where('user_id', $userId)
             ->whereBetween('date', [$start, $end])
+            ->whereNotNull('paid_at')
             ->groupBy('period', 'type')
             ->orderBy('period')
             ->get();

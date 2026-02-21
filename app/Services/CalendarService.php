@@ -28,6 +28,7 @@ class CalendarService
                 'type' => $t->type,
                 'date' => Carbon::parse($t->date),
                 'is_projected' => false,
+                'is_paid' => $t->paid_at !== null,
             ]);
 
         // =========================
@@ -57,6 +58,7 @@ class CalendarService
                     'type' => $recurrence->type,
                     'date' => $date,
                     'is_projected' => true,
+                    'is_paid' => false, // pode ser usado para marcar como pago no futuro
                 ];
             }
         }
@@ -112,6 +114,7 @@ class CalendarService
                 'is_projected' => $item['is_projected'],
                 'is_today' => $isToday,
                 'is_overdue' => $isOverdue,
+                'is_paid' => $item['is_paid'],
             ];
 
             if (!isset($calendar[$dateKey])) {
