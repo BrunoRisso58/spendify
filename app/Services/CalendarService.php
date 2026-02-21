@@ -28,6 +28,7 @@ class CalendarService
                 'type' => $t->type,
                 'date' => Carbon::parse($t->date),
                 'is_projected' => false,
+                'is_paid' => $t->paid_at !== null,
             ]);
 
         // =========================
@@ -57,6 +58,7 @@ class CalendarService
                     'type' => $recurrence->type,
                     'date' => $date,
                     'is_projected' => true,
+                    'is_paid' => false, // pode ser usado para marcar como pago no futuro
                 ];
             }
         }
@@ -76,7 +78,7 @@ class CalendarService
             ->where('date', '<', $start)
             ->selectRaw("
                 SUM(CASE 
-                    WHEN type = 'income' THEN amount 
+                    WHEN type = 'entrada' THEN amount 
                     ELSE -amount 
                 END) as balance
             ")
@@ -94,7 +96,15 @@ class CalendarService
             $dateKey = $item['date']->toDateString();
 
             // saldo acumulado
-            $runningBalance += $item['type'] === 'income'
+            // if ($item['type'] === 'entrada') {
+            //     $runningBalance += $item['amount'];
+            // } else {
+            //     if ($item['is_paid']) {
+            //         $runningBalance -= $item['amount'];
+            //     }
+            // }
+
+            $runningBalance += $item['type'] === 'entrada'
                 ? $item['amount']
                 : -$item['amount'];
 
@@ -112,6 +122,7 @@ class CalendarService
                 'is_projected' => $item['is_projected'],
                 'is_today' => $isToday,
                 'is_overdue' => $isOverdue,
+                'is_paid' => $item['is_paid'],
             ];
 
             if (!isset($calendar[$dateKey])) {
@@ -126,12 +137,12 @@ class CalendarService
             $calendar[$dateKey]['items'][] = $formatted;
 
             // saldo do dia
-            $calendar[$dateKey]['daily_balance'] += $item['type'] === 'income'
+            $calendar[$dateKey]['daily_balance'] += $item['type'] === 'entrada'
                 ? $item['amount']
                 : -$item['amount'];
 
             // saldo acumulado até o dia
-            $calendar[$dateKey]['running_balance'] = $runningBalance;
+            $calendar[$dateKey]['running_balance'] = (float) $runningBalance;
         }
 
         return [

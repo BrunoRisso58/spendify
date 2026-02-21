@@ -89,7 +89,7 @@ class ProcessAlerts extends Command
         $balance = Transaction::where('user_id', $user->id)
             ->selectRaw("
                 SUM(CASE 
-                        WHEN type = 'income' THEN amount 
+                        WHEN type = 'entrada' THEN amount 
                         ELSE -amount 
                     END) as balance
             ")

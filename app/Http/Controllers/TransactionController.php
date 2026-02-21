@@ -64,4 +64,18 @@ class TransactionController extends Controller
 
         return $this->successResponse(null, 'Transaction deleted successfully');
     }
+
+    public function pay($id)
+    {
+        return response()->json(
+            $this->service->pay(Auth::id(), $id)
+        );
+    }
+
+    public function unpay($id)
+    {
+        return response()->json(
+            $this->service->unpay(Auth::id(), $id)
+        );
+    }
 }

@@ -9,12 +9,15 @@ class Transaction extends Model
     protected $fillable = [
         'user_id',
         'category_id',
+        'installment_id',
+        'installment_number',
         'title',
         'amount',
         'type',
         'date',
         'description',
-        'recurrence_id'
+        'recurrence_id',
+        'paid_at',
     ];
 
     public function user()
