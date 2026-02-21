@@ -2,10 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BudgetController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\RecurrenceController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\AlertController;
+use App\Http\Controllers\CalendarController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -48,4 +51,20 @@ Route::middleware('auth:api')->group(function () {
         Route::get('/categories', [ReportController::class, 'categories']);
         Route::get('/cashflow', [ReportController::class, 'cashflow']);
     });
+
+    Route::prefix('budgets')->group(function () {
+        Route::get('/', [BudgetController::class, 'index']);
+        Route::post('/', [BudgetController::class, 'store']);
+        Route::get('/status', [BudgetController::class, 'status']);
+        Route::get('/{id}', [BudgetController::class, 'show']);
+        Route::put('/{id}', [BudgetController::class, 'update']);
+        Route::delete('/{id}', [BudgetController::class, 'destroy']);
+    });
+
+    Route::prefix('alerts')->group(function () {
+        Route::get('/', [AlertController::class, 'index']);
+        Route::patch('/{id}/toggle-read', [AlertController::class, 'toggle']);
+    });
+
+    Route::get('/calendar', [CalendarController::class, 'index']);
 });
