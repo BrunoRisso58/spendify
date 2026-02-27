@@ -13,15 +13,15 @@ use App\Http\Controllers\InstallmentController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/user/{phoneNumber}', [AuthController::class, 'me']);
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/me', [AuthController::class, 'me']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/refresh', [AuthController::class, 'refresh']);
 
     // Transactions
     Route::prefix('transactions')->group(function () {
-        Route::get('/', [TransactionController::class, 'index']);
+        Route::get('/', [TransactionController::class, ' index']);
         Route::post('/', [TransactionController::class, 'store']);
         Route::get('/{id}', [TransactionController::class, 'show']);
         Route::put('/{id}', [TransactionController::class, 'update']);

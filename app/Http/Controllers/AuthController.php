@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
+    use ApiResponse;
+
     public function register(Request $request)
     {
         info($request->all());
@@ -44,9 +47,19 @@ class AuthController extends Controller
         ]);
     }
 
-    public function me()
+    public function me($phoneNumber)
     {
-        return response()->json(auth()->user());
+        try {
+            $user = User::where('phone_number', $phoneNumber)->first();
+
+            if (!$user) {
+                return $this->errorResponse('User not found', 404);
+            }
+
+            return $this->successResponse($user, 'User retrieved successfully');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to retrieve user: ' . $e->getMessage(), 500);
+        }
     }
 
     public function logout()
