@@ -21,7 +21,7 @@ Route::middleware('auth:api')->group(function () {
 
     // Transactions
     Route::prefix('transactions')->group(function () {
-        Route::get('/', [TransactionController::class, ' index']);
+        Route::get('/', [TransactionController::class, 'index']);
         Route::post('/', [TransactionController::class, 'store']);
         Route::get('/{id}', [TransactionController::class, 'show']);
         Route::put('/{id}', [TransactionController::class, 'update']);

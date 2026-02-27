@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 use App\Traits\ApiResponse;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -36,15 +37,18 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        try {
+            $phoneNumber = $request->validate([
+                'phone_number' => 'required|exists:users,phone_number'
+            ]);
 
-        if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            $user = User::where('phone_number', $phoneNumber)->first();
+            $token = JWTAuth::fromUser($user);
+
+            return $this->successResponse($token, 'Login successful');
+        } catch (\Exception $e) {
+            return $this->errorResponse('Failed to login' . $e->getMessage(), 500);
         }
-
-        return response()->json([
-            'token' => $token
-        ]);
     }
 
     public function me($phoneNumber)
