@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
 use App\Models\Transaction;
 
 class ReportService
@@ -52,8 +53,11 @@ class ReportService
 
     public function getCategories($userId, $filters = [])
     {
-        $from = $filters['from'] ?? null;
-        $to = $filters['to'] ?? null;
+        $from = $filters['from'] 
+            ?? Carbon::now()->startOfMonth()->format('Y-m-d');
+
+        $to = $filters['to'] 
+            ?? Carbon::now()->endOfMonth()->format('Y-m-d');
 
         $transactions = Transaction::query()
             ->selectRaw('category_id, type, SUM(amount) as total, MAX(date) as date')
@@ -68,19 +72,47 @@ class ReportService
             ->with('category:id,name')
             ->get();
 
-        $total = $transactions->sum('total');
+        // $total = $transactions->sum('total');
+        $total['incomes'] = $transactions
+            ->where('type', 'entrada')
+            ->sum('total');
 
-        return $transactions->map(function ($item) use ($total) {
-            return [
-                'category_id' => $item->category_id,
-                'category_name' => $item->category?->name,
-                'type' => $item->type,
-                'total' => (float) $item->total,
-                'percentage' => $total > 0
-                    ? round(($item->total / $total) * 100, 2)
-                    : 0,
-            ];
+        $total['outcomes'] = $transactions
+            ->where('type', 'saída')
+            ->sum('total');
+
+        $incomes = [];
+        $outcomes = [];
+
+        $transactions->map(function ($item) use ($total, &$incomes, &$outcomes) {
+            if ($item->type == 'entrada') {
+                // info($incomes);
+                array_push($incomes, [
+                    'category_id' => $item->category_id,
+                    'category_name' => $item->category?->name,
+                    'type' => $item->type,
+                    'total' => (float) $item->total,
+                    'percentage' => $total['incomes'] > 0 // change to total of type
+                        ? round(($item->total / $total['incomes']) * 100, 2)
+                        : 0,
+                ]);
+            } else {
+                array_push($outcomes, [
+                    'category_id' => $item->category_id,
+                    'category_name' => $item->category?->name,
+                    'type' => $item->type,
+                    'total' => (float) $item->total,
+                    'percentage' => $total['outcomes'] > 0 // change to total of type
+                        ? round(($item->total / $total['outcomes']) * 100, 2)
+                        : 0,
+                ]);
+            }
         });
+
+        return [
+            'incomes' => $incomes,
+            'outcomes' => $outcomes
+        ];
     }
 
     public function getCashflow($userId, $filters = [])

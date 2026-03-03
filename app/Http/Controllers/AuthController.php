@@ -47,7 +47,7 @@ class AuthController extends Controller
 
             return $this->successResponse($token, 'Login successful');
         } catch (\Exception $e) {
-            return $this->errorResponse('Failed to login' . $e->getMessage(), 500);
+            return $this->errorResponse('Failed to login: ' . $e->getMessage(), 500);
         }
     }
 
