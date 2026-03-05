@@ -37,8 +37,6 @@ class CreateTransactionsFromInstallments extends Command
                     $now = now();
                     $current = null;
 
-                    info($installment);
-
                     $current = $now->startOfMonth()
                         ->addDays(min(
                             $start->day - 1,
@@ -65,16 +63,16 @@ class CreateTransactionsFromInstallments extends Command
                         [
                             'user_id' => $installment->user_id,
                             'installment_id' => $installment->id,
-                            'installment_number' => $installment->current_installment,
+                            'installment_number' => $installment->next_installment,
                             'date' => $current->toDateString(),
                         ],
                         [
                             'user_id' => $installment->user_id,
                             'category_id' => $installment->category_id,
                             'installment_id' => $installment->id,
-                            'installment_number' => $installment->current_installment,
+                            'installment_number' => $installment->next_installment,
 
-                            'title' => $installment->title . " (" . $installment->current_installment . "/{$installment->total_installments})",
+                            'title' => $installment->title . " (" . $installment->next_installment . "/{$installment->total_installments})",
                             'amount' => $installment->installment_value,
                             'type' => $installment->type,
 

@@ -33,12 +33,15 @@ class Installment extends Model
         return round($this->total_amount / $this->total_installments, 2);
     }
 
-    public function getCurrentInstallmentAttribute()
+    public function getNextInstallmentAttribute()
     {
-        $paidCount = $this->transactions()
-            ->whereNotNull('paid_at')
-            ->count();
+        $transaction = $this->transactions()
+            ->select('installment_number')
+            ->orderByDesc('installment_number')
+            ->first();
 
-        return min($paidCount + 1, $this->total_installments);
+        $installmentNumber = $transaction->installment_number ?? $this->total_installments;
+
+        return min($installmentNumber + 1, $this->total_installments);
     }
 }
